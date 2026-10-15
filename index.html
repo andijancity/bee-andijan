@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beeline Андижан — GIS Network Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        beeline: { 500: '#FFCC00', 600: '#E6B800', dark: '#121214', panel: '#1A1A1E', border: '#2A2A30' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex flex-col h-screen select-none bg-beeline-dark text-zinc-100">
+    <header class="h-16 bg-beeline-panel border-b border-beeline-border px-4 sm:px-6 flex items-center justify-between z-30 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-beeline-500 flex items-center justify-center font-extrabold text-black text-xl shadow-lg">B</div>
+            <div>
+                <h1 class="font-bold text-base sm:text-lg text-white">Beeline Андижан</h1>
+                <p class="text-xs text-zinc-400">GIS Network Hub</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="btn-add-mode" class="px-3 py-2 rounded-xl bg-zinc-800 text-xs font-semibold border border-zinc-700">
+                <i class="fa-solid fa-plus-circle text-beeline-500 mr-1"></i>Добавить БС
+            </button>
+            <button id="btn-export-json" class="px-3 py-2 rounded-xl bg-beeline-500 text-black font-bold text-xs">
+                Экспорт JSON
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex relative overflow-hidden">
+        <aside id="sidebar" class="w-full sm:w-96 bg-beeline-panel border-r border-beeline-border z-20 flex flex-col">
+            <div class="flex border-b border-beeline-border bg-zinc-950/50 p-1 gap-1">
+                <button data-tab="towers" class="tab-btn active flex-1 py-2 text-xs font-semibold rounded-lg text-beeline-500">Вышки (БС)</button>
+                <button data-tab="routing" class="tab-btn flex-1 py-2 text-xs font-semibold rounded-lg text-zinc-400">Маршрут</button>
+            </div>
+            <div id="tab-towers" class="tab-content flex-1 p-4 overflow-y-auto space-y-2" id="tower-list-container"></div>
+            <div id="tab-routing" class="tab-content flex-1 hidden p-4 space-y-3">
+                <select id="route-target-select" class="w-full p-2 bg-zinc-900 border border-zinc-800 rounded-lg text-xs"></select>
+                <div id="route-stats-box" class="hidden p-3 bg-zinc-900 rounded-lg text-xs">
+                    <p>Дистанция: <span id="route-dist-val" class="text-beeline-500 font-bold"></span></p>
+                    <p>Время: <span id="route-time-val" class="text-white font-bold"></span></p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 h-full relative">
+            <div id="map" class="w-full h-full"></div>
+            <div class="absolute top-4 right-4 z-[1000] glass-panel p-2 rounded-xl border border-zinc-800">
+                <select id="tile-provider-select" class="bg-zinc-900 text-xs text-zinc-200 border border-zinc-700 rounded-lg p-1.5">
+                    <option value="esriStreet">Esri World Street</option>
+                    <option value="esriSatellite">Esri Satellite</option>
+                    <option value="osmStandard">OpenStreetMap</option>
+                </select>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
