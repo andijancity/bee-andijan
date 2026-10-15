@@ -1,0 +1,1740 @@
+<html lang="ru" class="dark"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxNTU0MjU5OTIzNDA0MjgwNjE3OSIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjX2Q2ZTQ3ZTI2NjViZDBjOWRfaW5kZXguaHRtbC03MzcifSwiZXhwIjoxNzkyMDg5Njk5LCJpYXQiOjE3OTIwODYwOTksImFsZyI6IlJTMjU2In0.YzulgdEEJxFsBqXraOhJncAN2U1FfHMKB6yIdzV1ngrZXLBJWwBBl5ZwGJl9-nwIRkzQmw1l9XrZduV7pct35ky0fDqR1l7uIfyo7dShGzhRw3N6SyH5R9MmCSwSPIi0ZPpAYGkV_PiWS_pUsgeHm6vmPT8ZCrWdUKgAU5ErChRi9HYNxcTy2kmxBWrYpnzTTN9KObOHTlNRK_4JDVHxzqlvR05Ghj3qRSMkJN9WlmPvwT657kNj897G3yrS4nExyj0pX1mBVrx_WgZqQ6rLoJ-cyi-rErOk1Jnz_KAFZ-DvqMurPTyIzDG18K1fKjwGwlX5SgPMv0QWfda50I-0Vw","c_d6e47e2665bd0c9d_index.html-737")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beeline Андижан — High-Speed GIS &amp; KMZ Planner</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        beeline: {
+                            500: '#FFCC00',
+                            600: '#E6B800',
+                            dark: '#121214',
+                            panel: '#1A1A1E',
+                            border: '#2A2A30'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+
+    <!-- Leaflet Routing Machine CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css">
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js" crossorigin="anonymous"></script>
+
+    <!-- JSZip Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
+
+    <!-- FontAwesome Icons & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #121214;
+            color: #F4F4F5;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(26, 26, 30, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 204, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121214;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3F3F46;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FFCC00;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: #1A1A1E !important;
+            color: #F4F4F5 !important;
+            border: 1px solid #FFCC00 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+        }
+        .leaflet-popup-tip {
+            background: #1A1A1E !important;
+        }
+
+        .leaflet-routing-container {
+            display: none !important;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 0.3; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .office-pulse {
+            animation: pulse-ring 2s infinite ease-in-out;
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Inter, system-ui, sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.left-0{left:0px}.left-1\/2{left:50%}.left-3{left:0.75rem}.right-4{right:1rem}.top-0{top:0px}.top-1\/2{top:50%}.top-4{top:1rem}.z-10{z-index:10}.z-20{z-index:20}.z-30{z-index:30}.z-50{z-index:50}.z-\[1000\]{z-index:1000}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-6{margin-bottom:1.5rem}.ml-2{margin-left:0.5rem}.mr-1{margin-right:0.25rem}.mr-1\.5{margin-right:0.375rem}.mt-3{margin-top:0.75rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-10{height:2.5rem}.h-12{height:3rem}.h-16{height:4rem}.h-2\.5{height:0.625rem}.h-8{height:2rem}.h-full{height:100%}.h-screen{height:100vh}.w-10{width:2.5rem}.w-12{width:3rem}.w-2\.5{width:0.625rem}.w-8{width:2rem}.w-full{width:100%}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-translate-x-full{--tw-translate-x:-100%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-translate-y-1\/2{--tw-translate-y:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes ping{75%, 100%{transform:scale(2);opacity:0}}.animate-ping{animation:ping 1s cubic-bezier(0, 0, 0.2, 1) infinite}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;user-select:none}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-6{gap:1.5rem}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-3\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.875rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.875rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-x{border-left-width:1px;border-right-width:1px}.border-b{border-bottom-width:1px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-amber-500\/40{border-color:rgb(245 158 11 / 0.4)}.border-beeline-500\/30{border-color:rgb(255 204 0 / 0.3)}.border-beeline-500\/50{border-color:rgb(255 204 0 / 0.5)}.border-beeline-border{--tw-border-opacity:1;border-color:rgb(42 42 48 / var(--tw-border-opacity, 1))}.border-emerald-500\/20{border-color:rgb(16 185 129 / 0.2)}.border-rose-500\/30{border-color:rgb(244 63 94 / 0.3)}.border-zinc-700{--tw-border-opacity:1;border-color:rgb(63 63 70 / var(--tw-border-opacity, 1))}.border-zinc-800{--tw-border-opacity:1;border-color:rgb(39 39 42 / var(--tw-border-opacity, 1))}.border-zinc-800\/80{border-color:rgb(39 39 42 / 0.8)}.bg-amber-500\/20{background-color:rgb(245 158 11 / 0.2)}.bg-beeline-500{--tw-bg-opacity:1;background-color:rgb(255 204 0 / var(--tw-bg-opacity, 1))}.bg-beeline-500\/10{background-color:rgb(255 204 0 / 0.1)}.bg-beeline-500\/20{background-color:rgb(255 204 0 / 0.2)}.bg-beeline-dark{--tw-bg-opacity:1;background-color:rgb(18 18 20 / var(--tw-bg-opacity, 1))}.bg-beeline-panel{--tw-bg-opacity:1;background-color:rgb(26 26 30 / var(--tw-bg-opacity, 1))}.bg-black\/70{background-color:rgb(0 0 0 / 0.7)}.bg-black\/80{background-color:rgb(0 0 0 / 0.8)}.bg-emerald-500\/10{background-color:rgb(16 185 129 / 0.1)}.bg-rose-500\/10{background-color:rgb(244 63 94 / 0.1)}.bg-zinc-800{--tw-bg-opacity:1;background-color:rgb(39 39 42 / var(--tw-bg-opacity, 1))}.bg-zinc-900{--tw-bg-opacity:1;background-color:rgb(24 24 27 / var(--tw-bg-opacity, 1))}.bg-zinc-900\/50{background-color:rgb(24 24 27 / 0.5)}.bg-zinc-900\/80{background-color:rgb(24 24 27 / 0.8)}.bg-zinc-950{--tw-bg-opacity:1;background-color:rgb(9 9 11 / var(--tw-bg-opacity, 1))}.bg-zinc-950\/50{background-color:rgb(9 9 11 / 0.5)}.bg-zinc-950\/80{background-color:rgb(9 9 11 / 0.8)}.p-1{padding:0.25rem}.p-1\.5{padding:0.375rem}.p-2{padding:0.5rem}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-12{padding-top:3rem;padding-bottom:3rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.pb-2{padding-bottom:0.5rem}.pb-3{padding-bottom:0.75rem}.pb-4{padding-bottom:1rem}.pl-9{padding-left:2.25rem}.pr-1{padding-right:0.25rem}.pr-3{padding-right:0.75rem}.pt-1{padding-top:0.25rem}.pt-2{padding-top:0.5rem}.pt-3{padding-top:0.75rem}.text-left{text-align:left}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[9px\]{font-size:9px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-none{line-height:1}.tracking-tight{letter-spacing:-0.025em}.tracking-wider{letter-spacing:0.05em}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.text-beeline-500{--tw-text-opacity:1;color:rgb(255 204 0 / var(--tw-text-opacity, 1))}.text-black{--tw-text-opacity:1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-rose-400{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-zinc-100{--tw-text-opacity:1;color:rgb(244 244 245 / var(--tw-text-opacity, 1))}.text-zinc-200{--tw-text-opacity:1;color:rgb(228 228 231 / var(--tw-text-opacity, 1))}.text-zinc-300{--tw-text-opacity:1;color:rgb(212 212 216 / var(--tw-text-opacity, 1))}.text-zinc-400{--tw-text-opacity:1;color:rgb(161 161 170 / var(--tw-text-opacity, 1))}.text-zinc-500{--tw-text-opacity:1;color:rgb(113 113 122 / var(--tw-text-opacity, 1))}.text-zinc-600{--tw-text-opacity:1;color:rgb(82 82 91 / var(--tw-text-opacity, 1))}.placeholder-zinc-500::placeholder{--tw-placeholder-opacity:1;color:rgb(113 113 122 / var(--tw-placeholder-opacity, 1))}.opacity-0{opacity:0}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-beeline-500\/20{--tw-shadow-color:rgb(255 204 0 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.hover\:border-beeline-500:hover{--tw-border-opacity:1;border-color:rgb(255 204 0 / var(--tw-border-opacity, 1))}.hover\:bg-amber-500\/30:hover{background-color:rgb(245 158 11 / 0.3)}.hover\:bg-beeline-600:hover{--tw-bg-opacity:1;background-color:rgb(230 184 0 / var(--tw-bg-opacity, 1))}.hover\:bg-rose-500\/20:hover{background-color:rgb(244 63 94 / 0.2)}.hover\:bg-zinc-700:hover{--tw-bg-opacity:1;background-color:rgb(63 63 70 / var(--tw-bg-opacity, 1))}.hover\:text-rose-400:hover{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:underline:hover{-webkit-text-decoration-line:underline;text-decoration-line:underline}.focus\:border-beeline-500:focus{--tw-border-opacity:1;border-color:rgb(255 204 0 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}@media (min-width: 640px){.sm\:block{display:block}.sm\:inline{display:inline}.sm\:w-96{width:24rem}.sm\:gap-3{gap:0.75rem}.sm\:p-8{padding:2rem}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}}@media (min-width: 768px){.md\:inline{display:inline}}@media (min-width: 1024px){.lg\:relative{position:relative}.lg\:flex{display:flex}.lg\:hidden{display:none}.lg\:translate-x-0{--tw-translate-x:0px;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}}</style></head>
+<body class="flex flex-col h-screen select-none bg-beeline-dark text-zinc-100 relative">
+
+    <div id="auth-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            
+            <div class="flex items-center justify-between mb-6 border-b border-zinc-800 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-beeline-500 flex items-center justify-center font-extrabold text-black text-xl shadow-lg shadow-beeline-500/20">
+                        B
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-lg text-white">Beeline GIS Portal</h2>
+                        <p class="text-xs text-zinc-400">Андижан — Мониторинг &amp; Маршруты</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="form-login" class="space-y-4">
+                <div id="login-error-msg" class="hidden p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs"></div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Логин</label>
+                    <input type="text" id="login-username" required="" value="admin" class="w-full p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-beeline-500 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Пароль</label>
+                    <input type="password" id="login-password" required="" value="admin123" class="w-full p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-beeline-500 transition-colors">
+                </div>
+                <button type="submit" class="w-full py-3 bg-beeline-500 hover:bg-beeline-600 text-black font-extrabold text-xs rounded-xl transition-all shadow-lg shadow-beeline-500/20">
+                    Войти в систему
+                </button>
+                <div class="text-center pt-2">
+                    <button type="button" id="btn-show-register" class="text-xs text-beeline-500 hover:underline">
+                        Нет аккаунта? Зарегистрироваться
+                    </button>
+                </div>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="form-register" class="space-y-3.5 hidden">
+                <div id="reg-error-msg" class="hidden p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs"></div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">ФИО / Имя</label>
+                    <input type="text" id="reg-fullname" required="" placeholder="Инженер Сети" class="w-full p-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-beeline-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Логин</label>
+                    <input type="text" id="reg-username" required="" placeholder="engineer1" class="w-full p-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-beeline-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Пароль</label>
+                    <input type="password" id="reg-password" required="" placeholder="Пароль..." class="w-full p-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-beeline-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Роль в системе</label>
+                    <select id="reg-role" class="w-full p-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-beeline-500">
+                        <option value="Инженер Сети">Инженер Сети</option>
+                        <option value="Администратор">Администратор</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-3 bg-beeline-500 hover:bg-beeline-600 text-black font-extrabold text-xs rounded-xl transition-all shadow-lg shadow-beeline-500/20">
+                    Зарегистрироваться и Войти
+                </button>
+                <div class="text-center pt-1">
+                    <button type="button" id="btn-show-login" class="text-xs text-beeline-500 hover:underline">
+                        Уже есть аккаунт? Войти
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <header class="h-16 bg-beeline-panel border-b border-beeline-border px-4 sm:px-6 flex items-center justify-between z-30 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-beeline-500 flex items-center justify-center font-extrabold text-black text-xl shadow-lg shadow-beeline-500/20">
+                B
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="font-bold text-base sm:text-lg tracking-tight text-white">Beeline Андижан</h1>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-beeline-500/10 text-beeline-500 border border-beeline-500/30 uppercase">
+                        Fast GIS
+                    </span>
+                </div>
+                <p class="text-xs text-zinc-400 hidden sm:block">Быстрая загрузка KMZ и прокладка маршрутов</p>
+            </div>
+        </div>
+
+        <div class="hidden lg:flex items-center gap-6 text-xs border-x border-beeline-border px-6">
+            <div>
+                <span class="text-zinc-400 block">Статус офиса:</span>
+                <span id="top-office-status" class="font-mono text-amber-400 font-semibold">
+                    <i class="fa-solid fa-location-dot text-[10px] mr-1"></i>Офис не задан
+                </span>
+            </div>
+            <div>
+                <span class="text-zinc-400 block">Загружено БС:</span>
+                <span class="font-mono text-white font-semibold" id="top-stat-count">0 БС</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+            <div id="user-profile-bar" class="flex items-center gap-2 bg-zinc-900 p-1.5 px-3 rounded-xl border border-zinc-800 text-xs">
+                <i class="fa-solid fa-user-gear text-beeline-500"></i>
+                <div class="text-left">
+                    <span id="current-user-name" class="font-bold block text-white leading-none">Главный Администратор</span>
+                    <span id="current-user-role" class="text-[9px] text-zinc-400 leading-none block">Администратор</span>
+                </div>
+                <button id="btn-logout" title="Выйти из системы" class="ml-2 text-zinc-500 hover:text-rose-400 transition-colors">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+
+            <!-- ADMIN ONLY BUTTON: DOWNLOAD ZIP -->
+            <button id="btn-download-zip" class="px-3.5 py-2 rounded-xl bg-beeline-500 hover:bg-beeline-600 text-black font-extrabold text-xs transition-all flex items-center gap-2 shadow-lg shadow-beeline-500/20">
+                <i class="fa-solid fa-file-zipper text-sm"></i>
+                <span class="hidden md:inline">Скачать ZIP (Админ)</span>
+            </button>
+
+            <!-- SET OFFICE POINT BUTTON -->
+            <button id="btn-set-office-mode" class="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 text-xs font-semibold transition-all border border-amber-500/40 flex items-center gap-2">
+                <i class="fa-solid fa-building-flag text-beeline-500"></i>
+                <span class="hidden sm:inline">Задать офис на карте</span>
+            </button>
+
+            <!-- ADMIN ONLY BUTTON: MANUAL ADD TOWER -->
+            <button id="btn-add-mode" class="px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold transition-all border border-zinc-700 flex items-center gap-2 text-white">
+                <i class="fa-solid fa-plus-circle text-beeline-500"></i>
+                <span>Добавить БС</span>
+            </button>
+
+            <button id="btn-toggle-sidebar" class="lg:hidden p-2 rounded-xl bg-zinc-800 text-zinc-300">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex relative overflow-hidden">
+        <aside id="sidebar" class="absolute lg:relative top-0 left-0 h-full w-full sm:w-96 bg-beeline-panel border-r border-beeline-border z-20 flex flex-col transition-transform duration-300 lg:translate-x-0 -translate-x-full">
+            <div class="flex border-b border-beeline-border bg-zinc-950/50 p-1 gap-1">
+                <button data-tab="kmz" class="tab-btn active flex-1 py-2.5 text-xs font-semibold rounded-lg text-beeline-500 bg-beeline-panel border border-beeline-500/30 transition-all flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-file-code"></i> KMZ / Настройки
+                </button>
+                <button data-tab="towers" class="tab-btn flex-1 py-2.5 text-xs font-semibold rounded-lg text-zinc-400 hover:text-white transition-all flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-tower-cell"></i> Список БС
+                </button>
+                <button data-tab="routing" class="tab-btn flex-1 py-2.5 text-xs font-semibold rounded-lg text-zinc-400 hover:text-white transition-all flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-route"></i> Маршрут
+                </button>
+            </div>
+
+            <!-- TAB 1: KMZ / KML UPLOADER -->
+            <div id="tab-kmz" class="tab-content flex-1 p-4 overflow-y-auto space-y-4">
+                <!-- ADMIN ONLY UPLOAD ZONE -->
+                <div id="admin-upload-section" class="border-2 border-dashed border-zinc-700 hover:border-beeline-500 rounded-2xl p-6 text-center bg-zinc-900/50 transition-all cursor-pointer relative">
+                    <input type="file" id="kmz-file-input" accept=".kmz,.kml" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                    <div class="w-12 h-12 mx-auto rounded-xl bg-beeline-500/10 border border-beeline-500/30 text-beeline-500 flex items-center justify-center text-xl mb-3">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <h3 class="text-xs font-bold text-white mb-1">Загрузить KMZ / KML (Админ)</h3>
+                    <p class="text-[11px] text-zinc-400">Перетащите сюда файл из Google Earth</p>
+                    <span class="inline-block mt-3 px-3 py-1 bg-zinc-800 rounded-full text-[10px] text-zinc-400 font-mono">.KMZ / .KML</span>
+                </div>
+
+                <!-- NON-ADMIN NOTICE -->
+                <div id="user-upload-notice" class="hidden p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-400 text-center">
+                    <i class="fa-solid fa-lock text-beeline-500 text-lg mb-2 block"></i>
+                    Загружать новые KMZ файлы может только <b>Администратор</b>. Инженеры могут просматривать карту и строить маршруты.
+                </div>
+
+                <div id="kmz-status-card" class="hidden p-3.5 bg-zinc-900 rounded-xl border border-zinc-800 space-y-2 text-xs">
+                    <div class="flex items-center justify-between text-beeline-500 font-bold">
+                        <span><i class="fa-solid fa-file-circle-check mr-1.5"></i>Файл обработан</span>
+                        <span id="kmz-count-badge" class="font-mono text-xs bg-beeline-500/20 px-2 py-0.5 rounded border border-beeline-500/30">0 объектов</span>
+                    </div>
+                    <p id="kmz-filename" class="text-zinc-300 font-mono truncate text-[11px]"></p>
+                    
+                    <!-- ADMIN ONLY CLEAR BUTTON -->
+                    <button id="btn-clear-towers" class="admin-only w-full py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-lg text-xs font-semibold transition-all">
+                        <i class="fa-solid fa-trash mr-1"></i>Очистить все вышки (Админ)
+                    </button>
+                </div>
+
+                <div class="p-3 bg-zinc-950/80 rounded-xl border border-zinc-800/80 text-[11px] text-zinc-400 space-y-1.5">
+                    <span class="font-bold text-zinc-200 block"><i class="fa-solid fa-circle-info mr-1 text-beeline-500"></i>Быстрая инструкция:</span>
+                    <p>1. Нажмите <b>«Задать офис на карте»</b> и кликните в любой точке для отсчета маршрута.</p>
+                    <p>2. Администратор загружает <b>KMZ/KML</b> вышки для мгновенного считывания координат.</p>
+                </div>
+            </div>
+
+            <!-- TAB 2: TOWERS LIST -->
+            <div id="tab-towers" class="tab-content flex-1 flex flex-col p-4 overflow-hidden hidden">
+                <div class="space-y-3 mb-3">
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-xs"></i>
+                        <input type="text" id="tower-search" placeholder="Быстрый поиск..." class="w-full pl-9 pr-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-beeline-500">
+                    </div>
+                </div>
+
+                <div id="tower-list-container" class="flex-1 overflow-y-auto space-y-2 pr-1">
+                    <div class="text-center py-12 text-zinc-500 text-xs">
+                        <i class="fa-solid fa-satellite-dish text-2xl mb-2 text-zinc-600 block"></i>
+                        Список вышек пуст.<br>Администратор может загрузить KMZ файл.
+                    </div></div>
+            </div>
+
+            <!-- TAB 3: ROUTING -->
+            <div id="tab-routing" class="tab-content flex-1 hidden p-4 overflow-y-auto space-y-4">
+                <div class="bg-zinc-900/80 p-3.5 rounded-xl border border-zinc-800 space-y-3">
+                    <span class="text-xs font-semibold text-beeline-500 uppercase tracking-wider block">Стартовая точка (Офис)</span>
+                    <div id="office-info-card" class="flex items-center gap-3 bg-zinc-950 p-2.5 rounded-lg border border-zinc-800">
+                        <div class="w-8 h-8 rounded-lg bg-zinc-800 text-zinc-400 font-bold flex items-center justify-center text-xs" id="office-icon-badge">
+                            <i class="fa-solid fa-building"></i>
+                        </div>
+                        <div class="overflow-hidden flex-1">
+                            <p class="text-xs font-semibold text-white truncate" id="office-card-title">Точка не установлена</p>
+                            <p class="text-[10px] text-zinc-400 font-mono" id="office-card-coords">Нажмите «Задать офис»</p>
+                        </div>
+                        <button id="btn-reselect-office" class="text-beeline-500 hover:underline text-xs">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-zinc-900/80 p-3.5 rounded-xl border border-zinc-800 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold text-beeline-500 uppercase tracking-wider block">Целевая вышка</span>
+                        <button id="btn-find-nearest" class="text-[11px] text-beeline-500 hover:underline">
+                            <i class="fa-solid fa-bolt mr-1"></i>Ближайшая БС
+                        </button>
+                    </div>
+                    <select id="route-target-select" class="w-full p-2.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-200 focus:outline-none focus:border-beeline-500"><option value="">Выберите целевую БС...</option></select>
+                </div>
+
+                <div id="route-stats-box" class="hidden bg-zinc-900 p-4 rounded-xl border border-beeline-500/30 space-y-3">
+                    <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+                        <span class="text-xs text-zinc-400">Метрики кратчайшего пути</span>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">OSRM</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-2.5 bg-zinc-950 rounded-lg">
+                            <span class="text-[10px] text-zinc-500 uppercase block">Дистанция</span>
+                            <span class="text-lg font-extrabold text-beeline-500 font-mono" id="route-dist-val">0.0 км</span>
+                        </div>
+                        <div class="p-2.5 bg-zinc-950 rounded-lg">
+                            <span class="text-[10px] text-zinc-500 uppercase block">Время в пути</span>
+                            <span class="text-lg font-extrabold text-white font-mono" id="route-time-val">0 мин</span>
+                        </div>
+                    </div>
+                    <button id="btn-clear-route" class="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold rounded-lg transition-all">
+                        Сбросить маршрут
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-3 border-t border-beeline-border bg-zinc-950/80 text-[11px] text-zinc-500 flex items-center justify-between">
+                <span>ГИС Beeline</span>
+                <span class="font-mono text-zinc-400">v6.0-Turbo</span>
+            </div>
+        </aside>
+
+        <main class="flex-1 h-full relative z-10">
+            <div id="map" class="w-full h-full bg-zinc-950 leaflet-container leaflet-touch leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" tabindex="0" style="position: relative;"><div class="leaflet-pane leaflet-map-pane" style="transform: translate3d(0px, 0px, 0px);"><div class="leaflet-pane leaflet-tile-pane"><div class="leaflet-layer " style="z-index: 1; opacity: 1;"><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 16; transform: translate3d(-1884px, -738px, 0px) scale(4);"></div><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 18; transform: translate3d(0px, 0px, 0px) scale(1);"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/768/1436" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(180px, 10px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/768/1437" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(436px, 10px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/769/1436" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(180px, 266px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/769/1437" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(436px, 266px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/767/1436" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(180px, -246px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/767/1437" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(436px, -246px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/768/1435" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-76px, 10px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/768/1438" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(692px, 10px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/769/1435" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-76px, 266px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/769/1438" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(692px, 266px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/770/1436" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(180px, 522px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/770/1437" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(436px, 522px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/767/1435" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-76px, -246px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/767/1438" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(692px, -246px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/770/1435" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-76px, 522px, 0px); opacity: 1;"><img crossorigin="" alt="" src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/11/770/1438" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(692px, 522px, 0px); opacity: 1;"></div></div></div><div class="leaflet-pane leaflet-overlay-pane"></div><div class="leaflet-pane leaflet-shadow-pane"></div><div class="leaflet-pane leaflet-marker-pane"></div><div class="leaflet-pane leaflet-tooltip-pane"></div><div class="leaflet-pane leaflet-popup-pane"></div><div class="leaflet-proxy leaflet-zoom-animated" style="transform: translate3d(367910px, 196980px, 0px) scale(1024);"></div></div><div class="leaflet-control-container"><div class="leaflet-top leaflet-left"></div><div class="leaflet-top leaflet-right"><div class="leaflet-control-zoom leaflet-bar leaflet-control"><a class="leaflet-control-zoom-in" href="#" title="Zoom in" role="button" aria-label="Zoom in" aria-disabled="false"><span aria-hidden="true">+</span></a><a class="leaflet-control-zoom-out" href="#" title="Zoom out" role="button" aria-label="Zoom out" aria-disabled="false"><span aria-hidden="true">−</span></a></div></div><div class="leaflet-bottom leaflet-left"></div><div class="leaflet-bottom leaflet-right"><div class="leaflet-control-attribution leaflet-control"><a href="https://leafletjs.com" title="A JavaScript library for interactive maps"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"></path><path fill="#FFD500" d="M0 4h12v3H0z"></path><path fill="#E0BC00" d="M0 7h12v1H0z"></path></svg> Leaflet</a> <span aria-hidden="true">|</span> Tiles © Esri</div></div></div></div>
+
+            <div class="absolute top-4 right-4 z-[1000] glass-panel p-2 rounded-xl border border-zinc-800 shadow-xl flex items-center gap-2">
+                <span class="text-xs text-zinc-400 font-semibold px-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-layer-group text-beeline-500"></i> Слой:
+                </span>
+                <select id="tile-provider-select" class="bg-zinc-900 text-xs text-zinc-200 border border-zinc-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-beeline-500 cursor-pointer">
+                    <option value="esriStreet" selected="">Esri World Street</option>
+                    <option value="esriSatellite">Esri World Imagery (Спутник)</option>
+                    <option value="osmStandard">OpenStreetMap</option>
+                </select>
+            </div>
+
+            <div id="map-mode-indicator" class="hidden absolute top-4 left-1/2 -translate-x-1/2 z-[1000] glass-panel px-4 py-2 rounded-full text-xs font-semibold text-beeline-500 shadow-xl border border-beeline-500/50 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-beeline-500 animate-ping"></span>
+                <span id="map-mode-text">Кликните по карте</span>
+                <button id="btn-cancel-mode" class="ml-2 text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- ADD TOWER MODAL -->
+    <div id="add-tower-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-6 border border-beeline-500/30 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-tower-broadcast text-beeline-500"></i>
+                    Новая Вышка (Ручной ввод - Админ)
+                </h3>
+                <button id="modal-close-btn" class="text-zinc-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="add-tower-form" class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-zinc-400 mb-1">Идентификатор БС</label>
+                    <input type="text" id="input-tower-id" required="" placeholder="BS-AND-109" class="w-full p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white font-mono focus:outline-none focus:border-beeline-500">
+                </div>
+
+                <div>
+                    <label class="block text-zinc-400 mb-1">Локация / Название</label>
+                    <input type="text" id="input-tower-district" required="" placeholder="ул. Найман, Андижан" class="w-full p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white focus:outline-none focus:border-beeline-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-zinc-400 mb-1">Широта (Lat)</label>
+                        <input type="number" step="any" id="input-tower-lat" required="" class="w-full p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white font-mono focus:outline-none focus:border-beeline-500">
+                    </div>
+                    <div>
+                        <label class="block text-zinc-400 mb-1">Долгота (Lng)</label>
+                        <input type="number" step="any" id="input-tower-lng" required="" class="w-full p-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white font-mono focus:outline-none focus:border-beeline-500">
+                    </div>
+                </div>
+
+                <div class="pt-3">
+                    <button type="submit" class="w-full py-2.5 bg-beeline-500 hover:bg-beeline-600 text-black font-bold rounded-lg transition-all">
+                        Сохранить вышку
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // System Users Database
+        let usersDatabase = [
+            { id: "USR-01", username: "admin", passHash: "admin123", fullname: "Главный Администратор", role: "Администратор" },
+            { id: "USR-02", username: "engineer", passHash: "beeline2026", fullname: "Инженер Сети Андижан", role: "Инженер Сети" }
+        ];
+
+        let currentUser = null;
+
+        // Custom User-defined Main Office Coordinates
+        let customOffice = null;
+        let officeMarker = null;
+
+        // Base Stations dataset
+        let towersData = [];
+
+        let map;
+        let currentTileLayer = null;
+        let routingControl = null;
+        
+        // Fast Layer Groups for optimized batch map rendering
+        let towersLayerGroup = null;
+        let markersMap = new Map();
+
+        let activeClickMode = null; // 'addTower' or 'setOffice'
+
+        const tileProviders = {
+            esriStreet: {
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+                attribution: 'Tiles © Esri',
+                maxZoom: 18
+            },
+            esriSatellite: {
+                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                attribution: 'Tiles © Esri',
+                maxZoom: 18
+            },
+            osmStandard: {
+                url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                attribution: '© OpenStreetMap contributors',
+                subdomains: 'abc',
+                maxZoom: 19
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initAuthEvents();
+            
+            // Default login as Admin
+            currentUser = usersDatabase[0];
+            onLoginSuccess(currentUser);
+
+            initMap();
+            refreshUI();
+            setupEventListeners();
+        });
+
+        function initAuthEvents() {
+            const loginForm = document.getElementById("form-login");
+            const regForm = document.getElementById("form-register");
+            const showRegBtn = document.getElementById("btn-show-register");
+            const showLoginBtn = document.getElementById("btn-show-login");
+
+            showRegBtn?.addEventListener("click", () => {
+                loginForm.classList.add("hidden");
+                regForm.classList.remove("hidden");
+            });
+
+            showLoginBtn?.addEventListener("click", () => {
+                regForm.classList.remove("hidden");
+                loginForm.classList.add("hidden");
+            });
+
+            loginForm?.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const uVal = document.getElementById("login-username").value.trim();
+                const pVal = document.getElementById("login-password").value.trim();
+                const errBox = document.getElementById("login-error-msg");
+
+                const user = usersDatabase.find(u => u.username.toLowerCase() === uVal.toLowerCase() && u.passHash === pVal);
+                if (user) {
+                    errBox.classList.add("hidden");
+                    currentUser = user;
+                    onLoginSuccess(user);
+                } else {
+                    errBox.textContent = "Неверный логин или пароль!";
+                    errBox.classList.remove("hidden");
+                }
+            });
+
+            regForm?.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const fullName = document.getElementById("reg-fullname").value.trim();
+                const uVal = document.getElementById("reg-username").value.trim();
+                const pVal = document.getElementById("reg-password").value.trim();
+                const role = document.getElementById("reg-role").value;
+                const errBox = document.getElementById("reg-error-msg");
+
+                if (usersDatabase.some(u => u.username.toLowerCase() === uVal.toLowerCase())) {
+                    errBox.textContent = "Логин уже занят!";
+                    errBox.classList.remove("hidden");
+                    return;
+                }
+
+                const newUser = {
+                    id: `USR-0${usersDatabase.length + 1}`,
+                    username: uVal,
+                    passHash: pVal,
+                    fullname: fullName,
+                    role: role
+                };
+
+                usersDatabase.push(newUser);
+                currentUser = newUser;
+                onLoginSuccess(newUser);
+            });
+
+            document.getElementById("btn-logout")?.addEventListener("click", () => {
+                currentUser = null;
+                document.getElementById("auth-overlay").classList.remove("hidden");
+                document.getElementById("user-profile-bar").classList.add("hidden");
+            });
+        }
+
+        function onLoginSuccess(user) {
+            document.getElementById("auth-overlay").classList.add("hidden");
+            const profileBar = document.getElementById("user-profile-bar");
+            profileBar.classList.remove("hidden");
+            document.getElementById("current-user-name").textContent = user.fullname;
+            document.getElementById("current-user-role").textContent = user.role;
+
+            const btnDownloadZip = document.getElementById("btn-download-zip");
+            const btnAddMode = document.getElementById("btn-add-mode");
+            const adminUploadSection = document.getElementById("admin-upload-section");
+            const userUploadNotice = document.getElementById("user-upload-notice");
+
+            const isAdmin = user.role === "Администратор";
+
+            // PERMISSION LOCKING FOR NON-ADMINS
+            if (isAdmin) {
+                btnDownloadZip?.classList.remove("hidden");
+                btnAddMode?.classList.remove("hidden");
+                adminUploadSection?.classList.remove("hidden");
+                userUploadNotice?.classList.add("hidden");
+                document.querySelectorAll(".admin-only").forEach(el => el.classList.remove("hidden"));
+            } else {
+                btnDownloadZip?.classList.add("hidden");
+                btnAddMode?.classList.add("hidden");
+                adminUploadSection?.classList.add("hidden");
+                userUploadNotice?.classList.remove("hidden");
+                document.querySelectorAll(".admin-only").forEach(el => el.classList.add("hidden"));
+            }
+
+            renderTowersOnMap();
+            renderTowerSidebarList();
+        }
+
+        function createOfficeIcon() {
+            return L.divIcon({
+                className: 'custom-office-icon',
+                html: `<div class="relative flex items-center justify-center">
+                    <div class="absolute w-10 h-10 rounded-full bg-beeline-500/40 office-pulse"></div>
+                    <div class="w-8 h-8 rounded-xl bg-beeline-500 border-2 border-black flex items-center justify-center text-black font-extrabold shadow-lg">
+                        <i class="fa-solid fa-building text-sm"></i>
+                    </div>
+                </div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
+        }
+
+        function createTowerIcon() {
+            return L.divIcon({
+                className: 'custom-tower-icon',
+                html: `
+                    <div class="relative group">
+                        <div class="w-7 h-7 rounded-full bg-beeline-500 border-2 border-zinc-950 flex items-center justify-center text-zinc-950 font-bold shadow-md transform hover:scale-125 transition-transform">
+                            <i class="fa-solid fa-tower-broadcast text-[11px]"></i>
+                        </div>
+                    </div>
+                `,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
+        }
+
+        function initMap() {
+            map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([40.78210, 72.34420], 13);
+            setMapTileProvider('esriStreet');
+            L.control.zoom({ position: 'topright' }).addTo(map);
+
+            towersLayerGroup = L.featureGroup().addTo(map);
+
+            map.on('click', (e) => {
+                if (activeClickMode === 'setOffice') {
+                    setOfficeLocation(e.latlng.lat, e.latlng.lng);
+                    disableClickMode();
+                } else if (activeClickMode === 'addTower') {
+                    if (currentUser?.role !== "Администратор") {
+                        alert("Только Администратор имеет доступ к добавлению вышек!");
+                        disableClickMode();
+                        return;
+                    }
+                    openAddTowerModal(e.latlng.lat, e.latlng.lng);
+                    disableClickMode();
+                }
+            });
+        }
+
+        function setOfficeLocation(lat, lng) {
+            customOffice = {
+                id: "OFFICE-CUSTOM",
+                name: "Штаб-квартира / Офис Beeline",
+                lat: lat,
+                lng: lng
+            };
+
+            if (officeMarker) map.removeLayer(officeMarker);
+
+            officeMarker = L.marker([lat, lng], {
+                icon: createOfficeIcon()
+            }).addTo(map);
+
+            officeMarker.bindPopup(`
+                <div class="p-1 space-y-1">
+                    <span class="text-[10px] font-bold text-beeline-500 uppercase tracking-wider block">Штаб-квартира</span>
+                    <h4 class="font-bold text-sm text-white">${customOffice.name}</h4>
+                    <p class="text-xs text-zinc-400 font-mono">${lat.toFixed(5)}, ${lng.toFixed(5)}</p>
+                </div>
+            `).openPopup();
+
+            const topStatus = document.getElementById("top-office-status");
+            if (topStatus) {
+                topStatus.className = "font-mono text-beeline-500 font-semibold";
+                topStatus.innerHTML = `<i class="fa-solid fa-circle-check text-[10px] mr-1"></i>Точка задана (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
+            }
+
+            document.getElementById("office-card-title").textContent = "Офис / Главный пункт";
+            document.getElementById("office-card-coords").textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            
+            const badge = document.getElementById("office-icon-badge");
+            if (badge) {
+                badge.className = "w-8 h-8 rounded-lg bg-beeline-500 text-black font-bold flex items-center justify-center text-xs";
+            }
+        }
+
+        function setMapTileProvider(providerKey) {
+            const config = tileProviders[providerKey] || tileProviders.esriStreet;
+            if (currentTileLayer) map.removeLayer(currentTileLayer);
+
+            const options = {
+                attribution: config.attribution,
+                maxZoom: config.maxZoom,
+                crossOrigin: true
+            };
+            if (config.subdomains) options.subdomains = config.subdomains;
+
+            currentTileLayer = L.tileLayer(config.url, options).addTo(map);
+        }
+
+        function refreshUI() {
+            renderTowersOnMap();
+            renderTowerSidebarList();
+            updateTopStats();
+            populateRouteTargetSelect();
+        }
+
+        // Fast Batch Map Layer Rendering
+        function renderTowersOnMap() {
+            if (!towersLayerGroup) return;
+            towersLayerGroup.clearLayers();
+            markersMap.clear();
+
+            const isAdmin = currentUser?.role === "Администратор";
+
+            towersData.forEach(tower => {
+                const circle = L.circle([tower.lat, tower.lng], {
+                    radius: tower.radius || 850,
+                    color: "#FFCC00",
+                    fillColor: "#FFCC00",
+                    fillOpacity: 0.1,
+                    weight: 1.5,
+                    dashArray: '4, 4'
+                });
+
+                const marker = L.marker([tower.lat, tower.lng], {
+                    icon: createTowerIcon()
+                });
+
+                const deleteButtonHtml = isAdmin ? `
+                    <button onclick="window.deleteTower('${tower.id}')" class="px-2 py-1.5 bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg text-xs transition-all" title="Удалить БС (Админ)">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                ` : '';
+
+                marker.bindPopup(`
+                    <div class="p-1 space-y-2">
+                        <div class="flex items-center justify-between gap-2 border-b border-zinc-800 pb-1.5">
+                            <span class="font-mono text-xs font-bold text-beeline-500">${tower.id}</span>
+                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-zinc-800 text-beeline-500">KMZ Точка</span>
+                        </div>
+                        <h4 class="font-bold text-sm text-white">${tower.name}</h4>
+                        <p class="text-xs text-zinc-400">${tower.district || 'Андижан'}</p>
+                        <div class="flex gap-2 pt-1">
+                            <button onclick="window.selectAndRouteToTower('${tower.id}')" class="flex-1 py-1.5 bg-beeline-500 hover:bg-beeline-600 text-black font-bold text-xs rounded-lg transition-all">
+                                <i class="fa-solid fa-route mr-1"></i> Маршрут
+                            </button>
+                            ${deleteButtonHtml}
+                        </div>
+                    </div>
+                `);
+
+                towersLayerGroup.addLayer(circle);
+                towersLayerGroup.addLayer(marker);
+                markersMap.set(tower.id, marker);
+            });
+        }
+
+        // Optimized DOM Sidebar List Generation
+        function renderTowerSidebarList(query = "") {
+            const container = document.getElementById("tower-list-container");
+            if (!container) return;
+
+            const searchQuery = query.toLowerCase().trim();
+            const isAdmin = currentUser?.role === "Администратор";
+
+            const filtered = towersData.filter(t => {
+                return t.name.toLowerCase().includes(searchQuery) || t.id.toLowerCase().includes(searchQuery);
+            });
+
+            if (towersData.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-zinc-500 text-xs">
+                        <i class="fa-solid fa-satellite-dish text-2xl mb-2 text-zinc-600 block"></i>
+                        Список вышек пуст.<br>Администратор может загрузить KMZ файл.
+                    </div>`;
+                return;
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-zinc-500 text-xs">Вышки не найдены</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(t => {
+                const deleteBtn = isAdmin ? `
+                    <button onclick="event.stopPropagation(); window.deleteTower('${t.id}')" class="text-zinc-500 hover:text-rose-400 p-1" title="Удалить вышку">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                ` : '';
+
+                return `
+                    <div onclick="window.focusTowerOnMap('${t.id}')" class="p-3 bg-zinc-900/90 hover:bg-zinc-800/80 rounded-xl border border-zinc-800 hover:border-beeline-500/40 transition-all cursor-pointer space-y-1.5 group">
+                        <div class="flex items-center justify-between">
+                            <span class="font-mono text-xs font-bold text-beeline-500 group-hover:underline">${t.id}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-mono text-zinc-400">${t.lat.toFixed(4)}, ${t.lng.toFixed(4)}</span>
+                                ${deleteBtn}
+                            </div>
+                        </div>
+                        <h4 class="text-xs font-bold text-white">${t.name}</h4>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        window.focusTowerOnMap = function(id) {
+            const tower = towersData.find(t => t.id === id);
+            const marker = markersMap.get(id);
+            if (tower && marker) {
+                map.flyTo([tower.lat, tower.lng], 15, { duration: 1.0 });
+                marker.openPopup();
+            }
+        };
+
+        function calculateRouteToCoords(destLat, destLng) {
+            if (!customOffice) {
+                alert("Сначала укажите точку офиса на карте с помощью кнопки «Задать офис на карте»!");
+                enableSetOfficeMode();
+                return;
+            }
+
+            if (routingControl) map.removeControl(routingControl);
+
+            routingControl = L.Routing.control({
+                waypoints: [
+                    L.latLng(customOffice.lat, customOffice.lng),
+                    L.latLng(destLat, destLng)
+                ],
+                router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' }),
+                lineOptions: {
+                    styles: [
+                        { color: '#000000', opacity: 0.8, weight: 8 },
+                        { color: '#FFCC00', opacity: 1, weight: 5 }
+                    ]
+                },
+                addWaypoints: false,
+                draggableWaypoints: false,
+                fitSelectedRoutes: true,
+                show: false
+            }).addTo(map);
+
+            routingControl.on('routesfound', function(e) {
+                const summary = e.routes[0].summary;
+                document.getElementById("route-stats-box").classList.remove("hidden");
+                document.getElementById("route-dist-val").textContent = `${(summary.totalDistance / 1000).toFixed(2)} км`;
+                document.getElementById("route-time-val").textContent = `${Math.round(summary.totalTime / 60)} мин`;
+            });
+        }
+
+        window.selectAndRouteToTower = function(id) {
+            const tower = towersData.find(t => t.id === id);
+            if (tower) {
+                document.getElementById("route-target-select").value = tower.id;
+                calculateRouteToCoords(tower.lat, tower.lng);
+                switchTab('routing');
+            }
+        };
+
+        function findNearestTower() {
+            if (!customOffice) {
+                alert("Сначала укажите точку офиса на карте!");
+                return;
+            }
+            if (towersData.length === 0) return;
+            let nearest = null;
+            let minDist = Infinity;
+
+            towersData.forEach(t => {
+                const dist = Math.hypot(t.lat - customOffice.lat, t.lng - customOffice.lng);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearest = t;
+                }
+            });
+
+            if (nearest) window.selectAndRouteToTower(nearest.id);
+        }
+
+        function populateRouteTargetSelect() {
+            const select = document.getElementById("route-target-select");
+            if (!select) return;
+            select.innerHTML = '<option value="">Выберите целевую БС...</option>' + 
+                towersData.map(t => `<option value="${t.id}">${t.id} — ${t.name}</option>`).join("");
+        }
+
+        function updateTopStats() {
+            const statCount = document.getElementById("top-stat-count");
+            if (statCount) statCount.textContent = `${towersData.length} БС`;
+        }
+
+        async function handleKmzFile(file) {
+            if (currentUser?.role !== "Администратор") {
+                alert("Загрузка KMZ доступна только Администраторам!");
+                return;
+            }
+            if (!file) return;
+
+            try {
+                let kmlContent = "";
+
+                if (file.name.toLowerCase().endsWith(".kmz")) {
+                    const zip = new JSZip();
+                    const zipData = await zip.loadAsync(file);
+                    const kmlFile = Object.keys(zipData.files).find(name => name.toLowerCase().endsWith(".kml"));
+
+                    if (!kmlFile) {
+                        alert("Файл KML не найден внутри архива KMZ!");
+                        return;
+                    }
+
+                    kmlContent = await zipData.files[kmlFile].async("string");
+                } else {
+                    kmlContent = await file.text();
+                }
+
+                parseKmlAndLoadTowers(kmlContent, file.name);
+
+            } catch (err) {
+                alert("Ошибка при чтении KMZ/KML файла: " + err.message);
+            }
+        }
+
+        function parseKmlAndLoadTowers(kmlText, fileName) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(kmlText, "text/xml");
+            const placemarks = xmlDoc.getElementsByTagName("Placemark");
+
+            const newTowers = [];
+
+            for (let i = 0; i < placemarks.length; i++) {
+                const pm = placemarks[i];
+                const nameEl = pm.getElementsByTagName("name")[0];
+                const name = nameEl ? nameEl.textContent.trim() : `БС KMZ #${i + 1}`;
+
+                const coordEl = pm.getElementsByTagName("coordinates")[0];
+                if (coordEl) {
+                    const coordsRaw = coordEl.textContent.trim().split(/\s+/)[0];
+                    const parts = coordsRaw.split(",");
+
+                    if (parts.length >= 2) {
+                        const lng = parseFloat(parts[0]);
+                        const lat = parseFloat(parts[1]);
+
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            newTowers.push({
+                                id: `BS-KMZ-${Math.floor(1000 + Math.random() * 9000)}`,
+                                name: name,
+                                district: "Загружено из KMZ",
+                                lat: lat,
+                                lng: lng,
+                                radius: 850
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (newTowers.length === 0) {
+                alert("Не удалось извлечь координаты из этого KML/KMZ файла.");
+                return;
+            }
+
+            towersData = newTowers;
+            refreshUI();
+
+            document.getElementById("kmz-status-card").classList.remove("hidden");
+            document.getElementById("kmz-filename").textContent = fileName;
+            document.getElementById("kmz-count-badge").textContent = `${newTowers.length} БС`;
+
+            if (newTowers.length > 0 && towersLayerGroup.getBounds().isValid()) {
+                map.fitBounds(towersLayerGroup.getBounds().pad(0.1));
+            }
+
+            switchTab('towers');
+        }
+
+        function enableSetOfficeMode() {
+            activeClickMode = 'setOffice';
+            document.getElementById("map-mode-text").textContent = "Нажмите на карту для установки Офиса";
+            document.getElementById("map-mode-indicator").classList.remove("hidden");
+        }
+
+        function enableAddTowerMode() {
+            if (currentUser?.role !== "Администратор") {
+                alert("Только Администратор может добавлять вышки!");
+                return;
+            }
+            activeClickMode = 'addTower';
+            document.getElementById("map-mode-text").textContent = "Нажмите на карту для установки Вышки";
+            document.getElementById("map-mode-indicator").classList.remove("hidden");
+        }
+
+        function disableClickMode() {
+            activeClickMode = null;
+            document.getElementById("map-mode-indicator").classList.add("hidden");
+        }
+
+        function openAddTowerModal(lat, lng) {
+            document.getElementById("input-tower-lat").value = lat.toFixed(5);
+            document.getElementById("input-tower-lng").value = lng.toFixed(5);
+            document.getElementById("input-tower-id").value = `BS-AND-${Math.floor(100 + Math.random() * 900)}`;
+            document.getElementById("add-tower-modal").classList.remove("hidden");
+        }
+
+        function closeAddTowerModal() {
+            document.getElementById("add-tower-modal").classList.add("hidden");
+        }
+
+        // STRICT ADMIN ONLY DELETE TOWER FUNCTION
+        window.deleteTower = function(id) {
+            if (currentUser?.role !== "Администратор") {
+                alert("Удалять вышки может только Администратор!");
+                return;
+            }
+
+            towersData = towersData.filter(t => t.id !== id);
+            refreshUI();
+            if (routingControl) {
+                map.removeControl(routingControl);
+                document.getElementById("route-stats-box").classList.add("hidden");
+            }
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll(".tab-btn").forEach(btn => {
+                if (btn.getAttribute("data-tab") === tabId) {
+                    btn.classList.add("active", "text-beeline-500", "bg-beeline-panel", "border", "border-beeline-500/30");
+                    btn.classList.remove("text-zinc-400");
+                } else {
+                    btn.classList.remove("active", "text-beeline-500", "bg-beeline-panel", "border", "border-beeline-500/30");
+                    btn.classList.add("text-zinc-400");
+                }
+            });
+
+            document.querySelectorAll(".tab-content").forEach(content => {
+                content.classList.toggle("hidden", content.id !== `tab-${tabId}`);
+            });
+        }
+
+        async function generateAndDownloadProjectZip() {
+            if (currentUser?.role !== "Администратор") {
+                alert("Скачивание доступно только Администратору!");
+                return;
+            }
+            if (typeof JSZip === "undefined") {
+                alert("Загрузка библиотеки JSZip, повторите секунду спустя.");
+                return;
+            }
+            const zip = new JSZip();
+
+            zip.file("index.html", document.documentElement.outerHTML);
+            zip.file("users_db.json", JSON.stringify(usersDatabase, null, 2));
+
+            const blob = await zip.generateAsync({ type: "blob" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "beeline_andijan_kmz_site.zip";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
+
+        function setupEventListeners() {
+            document.getElementById("btn-download-zip")?.addEventListener("click", generateAndDownloadProjectZip);
+            document.getElementById("tile-provider-select")?.addEventListener("change", (e) => setMapTileProvider(e.target.value));
+            document.getElementById("btn-toggle-sidebar")?.addEventListener("click", () => document.getElementById("sidebar").classList.toggle("-translate-x-full"));
+            
+            document.querySelectorAll(".tab-btn").forEach(btn => {
+                btn.addEventListener("click", () => switchTab(btn.getAttribute("data-tab")));
+            });
+
+            document.getElementById("btn-set-office-mode")?.addEventListener("click", enableSetOfficeMode);
+            document.getElementById("btn-reselect-office")?.addEventListener("click", enableSetOfficeMode);
+
+            const fileInput = document.getElementById("kmz-file-input");
+            fileInput?.addEventListener("change", (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    handleKmzFile(e.target.files[0]);
+                }
+            });
+
+            document.getElementById("btn-clear-towers")?.addEventListener("click", () => {
+                if (currentUser?.role !== "Администратор") {
+                    alert("Только Администратор может очищать список вышек!");
+                    return;
+                }
+                towersData = [];
+                refreshUI();
+                document.getElementById("kmz-status-card").classList.add("hidden");
+                if (routingControl) map.removeControl(routingControl);
+                document.getElementById("route-stats-box").classList.add("hidden");
+            });
+
+            let searchTimeout = null;
+            document.getElementById("tower-search")?.addEventListener("input", (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => renderTowerSidebarList(e.target.value), 150);
+            });
+
+            document.getElementById("route-target-select")?.addEventListener("change", (e) => e.target.value && window.selectAndRouteToTower(e.target.value));
+            document.getElementById("btn-find-nearest")?.addEventListener("click", findNearestTower);
+
+            document.getElementById("btn-clear-route")?.addEventListener("click", () => {
+                if (routingControl) map.removeControl(routingControl);
+                document.getElementById("route-stats-box").classList.add("hidden");
+                document.getElementById("route-target-select").value = "";
+            });
+
+            document.getElementById("btn-add-mode")?.addEventListener("click", () => {
+                if (activeClickMode !== 'addTower') {
+                    enableAddTowerMode();
+                } else {
+                    disableClickMode();
+                }
+            });
+
+            document.getElementById("btn-cancel-mode")?.addEventListener("click", disableClickMode);
+            document.getElementById("modal-close-btn")?.addEventListener("click", closeAddTowerModal);
+
+            document.getElementById("add-tower-form")?.addEventListener("submit", (e) => {
+                e.preventDefault();
+                if (currentUser?.role !== "Администратор") {
+                    alert("Добавление вышек доступно только Администраторам!");
+                    return;
+                }
+                const districtVal = document.getElementById("input-tower-district").value;
+                const newTower = {
+                    id: document.getElementById("input-tower-id").value,
+                    name: districtVal,
+                    district: "Ручной ввод",
+                    lat: parseFloat(document.getElementById("input-tower-lat").value),
+                    lng: parseFloat(document.getElementById("input-tower-lng").value),
+                    radius: 850
+                };
+                towersData.push(newTower);
+                refreshUI();
+                closeAddTowerModal();
+                window.focusTowerOnMap(newTower.id);
+            });
+        }
+    </script>
+
+</body></html>

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "USR-01",
+    "username": "admin",
+    "passHash": "admin123",
+    "fullname": "Главный Администратор",
+    "role": "Администратор"
+  },
+  {
+    "id": "USR-02",
+    "username": "engineer",
+    "passHash": "beeline2026",
+    "fullname": "Инженер Сети Андижан",
+    "role": "Инженер Сети"
+  }
+]
