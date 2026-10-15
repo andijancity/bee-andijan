@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beeline Андижан — GIS Network Manager & Auth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        beeline: { 500: '#FFCC00', 600: '#E6B800', dark: '#121214', panel: '#1A1A1E', border: '#2A2A30' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex flex-col h-screen select-none bg-beeline-dark text-zinc-100 relative">
+
+    <div id="auth-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-6 sm:p-8 border border-beeline-500/40 shadow-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between mb-6 border-b border-zinc-800 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-beeline-500 flex items-center justify-center font-extrabold text-black text-xl shadow-lg">B</div>
+                    <div>
+                        <h2 class="font-bold text-lg text-white">Beeline GIS Portal</h2>
+                        <p class="text-xs text-zinc-400">Авторизация инженеров и админов</p>
+                    </div>
+                </div>
+            </div>
+
+            <form id="form-login" class="space-y-4">
+                <div id="login-error-msg" class="hidden p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs"></div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Имя пользователя (Логин)</label>
+                    <input type="text" id="login-username" required placeholder="admin" class="w-full p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-beeline-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Пароль</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white focus:outline-none focus:border-beeline-500">
+                </div>
+                <button type="submit" class="w-full py-3 bg-beeline-500 hover:bg-beeline-600 text-black font-extrabold text-xs rounded-xl transition-all shadow-lg">Войти в систему</button>
+                <div class="text-center pt-2">
+                    <button type="button" id="btn-show-register" class="text-xs text-beeline-500 hover:underline">Нет аккаунта? Зарегистрироваться</button>
+                </div>
+            </form>
+
+            <form id="form-register" class="space-y-3.5 hidden">
+                <div id="reg-error-msg" class="hidden p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs"></div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">ФИО / Имя</label>
+                    <input type="text" id="reg-fullname" required placeholder="Инженер Сети" class="w-full p-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Логин</label>
+                    <input type="text" id="reg-username" required placeholder="engineer1" class="w-full p-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Пароль</label>
+                    <input type="password" id="reg-password" required placeholder="Пароль..." class="w-full p-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-zinc-300 mb-1">Роль в системе</label>
+                    <select id="reg-role" class="w-full p-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-white">
+                        <option value="Инженер Сети">Инженер Сети</option>
+                        <option value="Администратор">Администратор</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-3 bg-beeline-500 hover:bg-beeline-600 text-black font-extrabold text-xs rounded-xl shadow-lg">Зарегистрироваться и Войти</button>
+                <div class="text-center pt-1">
+                    <button type="button" id="btn-show-login" class="text-xs text-beeline-500 hover:underline">Уже есть аккаунт? Войти</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <header class="h-16 bg-beeline-panel border-b border-beeline-border px-4 sm:px-6 flex items-center justify-between z-30">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-beeline-500 flex items-center justify-center font-extrabold text-black text-xl">B</div>
+            <div>
+                <h1 class="font-bold text-base sm:text-lg text-white">Beeline Андижан</h1>
+                <p class="text-xs text-zinc-400">Мониторинг базовых станций и трасс</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div id="user-profile-bar" class="hidden flex items-center gap-2 bg-zinc-900 p-1.5 px-3 rounded-xl border border-zinc-800 text-xs">
+                <i class="fa-solid fa-user-gear text-beeline-500"></i>
+                <div>
+                    <span id="current-user-name" class="font-bold block text-white">Admin</span>
+                    <span id="current-user-role" class="text-[9px] text-zinc-400 block">Администратор</span>
+                </div>
+                <button id="btn-logout" class="ml-2 text-zinc-500 hover:text-rose-400"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+            <button id="btn-download-zip" class="px-3.5 py-2 rounded-xl bg-beeline-500 text-black font-extrabold text-xs shadow-lg"><i class="fa-solid fa-file-zipper mr-1"></i>Скачать ZIP</button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex relative overflow-hidden">
+        <aside id="sidebar" class="w-full sm:w-96 bg-beeline-panel border-r border-beeline-border flex flex-col">
+            <div id="tower-list-container" class="flex-1 overflow-y-auto p-4 space-y-2.5"></div>
+        </aside>
+        <main class="flex-1 h-full relative">
+            <div id="map" class="w-full h-full"></div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

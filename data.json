@@ -1,0 +1,35 @@
+[
+  {
+    "id": "BS-AND-01",
+    "name": "БС Центр Бабур",
+    "district": "Центр, пр-т Бабура",
+    "lat": 40.7852,
+    "lng": 72.3490,
+    "radius": 950,
+    "status": "Active",
+    "tech": "LTE / 5G",
+    "signal": "-68 dBm"
+  },
+  {
+    "id": "BS-AND-02",
+    "name": "БС Старый Город",
+    "district": "Старый город / Чорсу",
+    "lat": 40.7715,
+    "lng": 72.3580,
+    "radius": 1100,
+    "status": "Active",
+    "tech": "4G LTE Advanced",
+    "signal": "-72 dBm"
+  },
+  {
+    "id": "BS-AND-03",
+    "name": "БС 3-й Микрорайон",
+    "district": "3-й Микрорайон",
+    "lat": 40.7640,
+    "lng": 72.3310,
+    "radius": 800,
+    "status": "High Load",
+    "tech": "LTE / 5G",
+    "signal": "-81 dBm"
+  }
+]
